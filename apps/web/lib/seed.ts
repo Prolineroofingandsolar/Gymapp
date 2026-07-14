@@ -216,11 +216,18 @@ export function seedDemo(db: Database.Database) {
     const m = person(name, "member", null, 100 + Math.floor(rnd() * 500));
     regulars.push(m);
     const target = 2 + Math.floor(rnd() * 2);
-    for (const ws of weeks) {
-      insCommit.run(uid(), gymId, m, ws, target);
-      attendWeek(m, ws, Math.max(0, target + (rnd() < 0.75 ? 0 : -1)), rnd() < 0.06 ? 1 : 0);
-    }
-    insCommit.run(uid(), gymId, m, weekStart(now), target);
+    const usesCommitments = rnd() < 0.7; // some members just train, no target set
+    // Most regulars have one off-week 2-4 weeks back, so current streaks vary
+    // (1-3 weeks) instead of everyone sitting on an 8-week milestone.
+    const missWeekIdx = rnd() < 0.9 ? 4 + Math.floor(rnd() * 2) : -1;
+    weeks.forEach((ws, i) => {
+      if (usesCommitments) insCommit.run(uid(), gymId, m, ws, target);
+      const visits = i === missWeekIdx
+        ? Math.max(0, target - 1 - Math.floor(rnd() * 2))
+        : target + (rnd() < 0.2 ? 1 : 0);
+      attendWeek(m, ws, visits, rnd() < 0.05 ? 1 : 0);
+    });
+    if (usesCommitments) insCommit.run(uid(), gymId, m, weekStart(now), target);
   }
 
   // ---- Future bookings ----

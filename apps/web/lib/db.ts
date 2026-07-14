@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { seedDemo } from "./seed";
 
-const SCHEMA = `
+export const SCHEMA = `
 create table if not exists gyms (
   id text primary key,
   name text not null,
